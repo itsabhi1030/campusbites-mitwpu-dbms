@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="36" fill="#005C29"/>
+  <!-- Subway Arrows & Text -->
+  <g transform="translate(18, 75)">
+    <!-- S with left arrow -->
+    <path d="M22 18 L10 24 L22 30 V24 H30 C36 24 40 20 40 14 C40 8 36 4 30 4 H14 V12 H28 C29 12 30 13 30 14 C30 15 29 16 28 16 H18 Z" fill="#FFC20E"/>
+    <!-- Text SUBWAY -->
+    <text x="10" y="42" font-family="'Arial Black', sans-serif" font-size="36" font-style="italic" font-weight="900">
+      <tspan fill="#FFC20E">SUB</tspan>
+      <tspan fill="#FFFFFF">WAY</tspan>
+    </text>
+    <!-- Arrow on Y -->
+    <path d="M148 42 L160 48 L148 54 V48 H138 V42 Z" fill="#FFFFFF"/>
+  </g>
+</svg>

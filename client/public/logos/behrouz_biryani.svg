@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="36" fill="#1A1513"/>
+  <!-- Royal Persian Crown / Crest -->
+  <g transform="translate(50, 35)">
+    <!-- Crown -->
+    <polygon points="10,50 30,25 50,45 70,25 90,50 85,65 15,65" fill="#D4AF37"/>
+    <circle cx="30" cy="22" r="3" fill="#D4AF37"/>
+    <circle cx="50" cy="42" r="3" fill="#D4AF37"/>
+    <circle cx="70" cy="22" r="3" fill="#D4AF37"/>
+    <rect x="20" y="68" width="60" height="4" rx="2" fill="#D4AF37"/>
+  </g>
+  <!-- Royal Serif Text -->
+  <text x="100" y="135" text-anchor="middle" font-family="'Georgia', serif" font-weight="bold" font-size="20" fill="#D4AF37" letter-spacing="3">BEHROUZ</text>
+  <text x="100" y="155" text-anchor="middle" font-family="'Georgia', serif" font-style="italic" font-size="12" fill="#C5A059" letter-spacing="2">THE ROYAL BIRYANI</text>
+</svg>

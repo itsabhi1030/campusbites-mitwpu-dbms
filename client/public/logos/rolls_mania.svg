@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="36" fill="#D84315"/>
+  <!-- Hot Kathi Roll in Foil -->
+  <g transform="translate(60, 30) rotate(-25 40 40)">
+    <rect x="25" y="15" width="30" height="80" rx="14" fill="#FFCC80"/>
+    <rect x="23" y="45" width="34" height="40" rx="4" fill="#ECEFF1"/>
+    <!-- Veggies/Fillings poking out -->
+    <circle cx="32" cy="20" r="5" fill="#4CAF50"/>
+    <circle cx="45" cy="22" r="5" fill="#F44336"/>
+    <circle cx="38" cy="14" r="4" fill="#FFEB3B"/>
+  </g>
+  <text x="100" y="152" text-anchor="middle" font-family="'Impact', sans-serif" font-weight="900" font-size="22" fill="#FFFFFF" letter-spacing="1">ROLLS MANIA</text>
+  <text x="100" y="172" text-anchor="middle" font-family="'Arial', sans-serif" font-size="9" font-weight="bold" fill="#FFCCBC" letter-spacing="2">PUNE'S FAVOURITE ROLLS</text>
+</svg>

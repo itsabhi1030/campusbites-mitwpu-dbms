@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="36" fill="#005A36"/>
+  <!-- Ice Cream Scoop & Leaf -->
+  <circle cx="100" cy="80" r="40" fill="#FFF8E7"/>
+  <!-- Fruit Leaf on Top -->
+  <path d="M100 40 C100 20 125 25 125 40 C110 42 100 40 100 40 Z" fill="#7CB342"/>
+  <!-- Scoops ripples -->
+  <path d="M68 95 C75 105 85 95 95 105 C105 95 115 105 125 95 C132 105 140 95 140 95" stroke="#E6D3A3" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <!-- Text -->
+  <text x="100" y="145" text-anchor="middle" font-family="'Georgia', serif" font-weight="900" font-size="22" fill="#FFFFFF">NATURAL</text>
+  <text x="100" y="165" text-anchor="middle" font-family="'Arial', sans-serif" font-size="10" font-weight="bold" fill="#A5D6A7" letter-spacing="2">ICE CREAM</text>
+</svg>

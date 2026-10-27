@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="cbGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EA580C"/>
+      <stop offset="100%" stop-color="#C2410C"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" rx="40" fill="url(#cbGrad)"/>
+  <!-- Cloche / Chef Hat -->
+  <path d="M100 48c-18 0-32 12-32 28 0 4 1 8 3 12-11 3-19 13-19 24 0 14 11 24 24 24h48c13 0 24-10 24-24 0-11-8-21-19-24 2-4 3-8 3-12 0-16-14-28-32-28z" fill="#FFFFFF"/>
+  <rect x="68" y="140" width="64" height="10" rx="5" fill="#FED7AA"/>
+  <rect x="74" y="154" width="52" height="6" rx="3" fill="#FED7AA"/>
+  <!-- Fork & Spoon Accent -->
+  <path d="M52 105c0-12 6-22 15-28M148 105c0-12-6-22-15-28" stroke="#FED7AA" stroke-width="4" stroke-linecap="round"/>
+  <text x="100" y="184" text-anchor="middle" font-family="'Inter', sans-serif" font-weight="900" font-size="16" fill="#FFFFFF" letter-spacing="2">CAMPUSBITES</text>
+</svg>

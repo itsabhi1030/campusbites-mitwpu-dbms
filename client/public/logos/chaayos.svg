@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="36" fill="#004D40"/>
+  <!-- Chai Kettle in Warm Gold -->
+  <g transform="translate(60, 40)">
+    <!-- Kettle Body -->
+    <path d="M20 40 C20 25 60 25 60 40 C75 50 80 85 60 100 H20 C0 85 5 50 20 40 Z" fill="#F59E0B"/>
+    <!-- Lid & Knob -->
+    <ellipse cx="40" cy="38" rx="22" ry="7" fill="#D97706"/>
+    <circle cx="40" cy="27" r="5" fill="#F59E0B"/>
+    <!-- Handle -->
+    <path d="M12 48 C-8 55 -8 85 14 90" fill="none" stroke="#F59E0B" stroke-width="6" stroke-linecap="round"/>
+    <!-- Spout -->
+    <path d="M64 55 C78 50 85 35 88 30 C84 48 72 70 62 75" fill="#F59E0B"/>
+  </g>
+  <!-- Text -->
+  <text x="100" y="165" text-anchor="middle" font-family="'Century Gothic', 'Arial', sans-serif" font-weight="900" font-size="22" fill="#FFFFFF" letter-spacing="2">Chaayos</text>
+</svg>

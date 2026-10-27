@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="36" fill="#EE3124"/>
+  <!-- Iconic Red Hut Roof -->
+  <path d="M30 85 C65 72 135 72 170 85 L180 98 H20 L30 85 Z" fill="#FFFFFF"/>
+  <path d="M40 92 C70 82 130 82 160 92 L165 98 H35 L40 92 Z" fill="#EE3124"/>
+  <ellipse cx="100" cy="68" rx="25" ry="8" fill="#FFFFFF"/>
+  <!-- Pizza Hut Text -->
+  <text x="100" y="142" text-anchor="middle" font-family="'Arial Black', sans-serif" font-style="italic" font-size="24" font-weight="900" fill="#FFFFFF" letter-spacing="1">Pizza Hut</text>
+</svg>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="36" fill="#1B4D3E"/>
+  <!-- Filter Kaapi Tumbler & Davara in Gold -->
+  <g transform="translate(65, 35)">
+    <!-- Davara (Bottom Dish) -->
+    <ellipse cx="35" cy="85" rx="36" ry="12" fill="#D4AF37"/>
+    <ellipse cx="35" cy="82" rx="32" ry="10" fill="#AA820A"/>
+    <!-- Tumbler (Top cup) -->
+    <path d="M15 35 L20 78 C25 82 45 82 50 78 L55 35 Z" fill="#D4AF37"/>
+    <!-- Tumbler Rim -->
+    <ellipse cx="35" cy="35" rx="20" ry="6" fill="#FFE57F"/>
+    <!-- Aroma Steam -->
+    <path d="M28 25 C25 18 32 12 28 5 M42 25 C39 18 46 12 42 5" stroke="#FFE57F" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  </g>
+  <text x="100" y="152" text-anchor="middle" font-family="'Arial Black', sans-serif" font-weight="900" font-size="16" fill="#FFFFFF" letter-spacing="1">MADRAS TIFFIN</text>
+  <text x="100" y="170" text-anchor="middle" font-family="'Arial', sans-serif" font-size="10" font-weight="bold" fill="#FFE57F" letter-spacing="2">AUTHENTIC SOUTH</text>
+</svg>

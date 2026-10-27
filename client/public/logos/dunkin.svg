@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="36" fill="#FFFFFF" stroke="#F5F5F5" stroke-width="2"/>
+  <!-- Iconic DD Logo -->
+  <g transform="translate(30, 45)">
+    <!-- First D in Orange -->
+    <path d="M15 15 H48 C68 15 80 28 80 48 C80 68 68 80 48 80 H15 Z" fill="#FF671F"/>
+    <path d="M32 32 H46 C56 32 62 38 62 48 C62 58 56 64 46 64 H32 Z" fill="#FFFFFF"/>
+    <!-- Second D in Magenta -->
+    <path d="M75 15 H108 C128 15 140 28 140 48 C140 68 128 80 108 80 H75 Z" fill="#DA1884"/>
+    <path d="M92 32 H106 C116 32 122 38 122 48 C122 58 116 64 106 64 H92 Z" fill="#FFFFFF"/>
+  </g>
+  <text x="100" y="162" text-anchor="middle" font-family="'Arial Black', sans-serif" font-weight="900" font-size="20">
+    <tspan fill="#FF671F">DUN</tspan>
+    <tspan fill="#DA1884">KIN'</tspan>
+  </text>
+</svg>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="36" fill="#000000"/>
+  <!-- Taco Bell Purple Dome & Bell -->
+  <g transform="translate(40, 25)">
+    <!-- Bell Outline -->
+    <path d="M60 15 C35 15 25 35 25 70 C25 95 15 110 5 115 H115 C105 110 95 95 95 70 C95 35 85 15 60 15 Z" fill="#702082"/>
+    <!-- Magenta highlight clapper -->
+    <path d="M60 25 C45 25 38 40 38 70 C38 92 30 104 22 108 H98 C90 104 82 92 82 70 C82 40 75 25 60 25 Z" fill="#A72585"/>
+    <circle cx="60" cy="118" r="16" fill="#EE2780"/>
+  </g>
+  <text x="100" y="172" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="900" font-size="18" fill="#FFFFFF" letter-spacing="3">TACO BELL</text>
+</svg>

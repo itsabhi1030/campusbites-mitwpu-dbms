@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="36" fill="#FDB813"/>
+  <!-- Steaming Momo Motif -->
+  <path d="M70 70 C70 50 130 50 130 70 C145 80 145 105 130 115 C115 125 85 125 70 115 C55 105 55 80 70 70 Z" fill="#FFFFFF" stroke="#D12026" stroke-width="4"/>
+  <!-- Steam Curves -->
+  <path d="M85 45 C80 35 90 28 85 20 M100 45 C95 35 105 28 100 20 M115 45 C110 35 120 28 115 20" stroke="#D12026" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <!-- Text Wow! Momo -->
+  <text x="100" y="152" text-anchor="middle" font-family="'Arial Black', sans-serif" font-weight="900" font-size="22" fill="#D12026" letter-spacing="1">wow! MOMO</text>
+  <text x="100" y="172" text-anchor="middle" font-family="'Arial', sans-serif" font-weight="bold" font-size="9" fill="#000000" letter-spacing="2">FLAVOURS OF HIMALAYAS</text>
+</svg>

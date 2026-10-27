@@ -1,0 +1,73 @@
+# ==============================================================================
+# MIT-WPU CampusBites — Git Ignore Configuration
+# ==============================================================================
+
+# 1. Environment & Secret Credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.cert
+*.pfx
+
+# 2. Platform, IDE & AI Agent Traces
+.antigravity/
+.gemini/
+.agents/
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 3. Dependencies & Package Managers
+node_modules/
+client/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# 4. Python & Virtual Environments
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 5. Build Artifacts & Distribution Folders
+dist/
+client/dist/
+build/
+out/
+.cache/
+.parcel-cache/
+.next/
+
+# 6. Compiled Binaries & Executables
+*.exe
+*.dll
+*.so
+*.dylib
+*.o
+*.obj
+cpp-engine/*.exe
+
+# 7. Scratch, Temporary & Diagnostic Dumps
+scratch/
+temp/
+tmp/
+*.tmp
+*.bak
+client/src/App.jsx.bak
+scripts/fetch-real-logos.mjs.bak
+
+# 8. Operating System Cache & Metadata
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

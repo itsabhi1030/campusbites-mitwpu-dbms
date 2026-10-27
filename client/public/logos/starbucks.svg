@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Green Outer Circle -->
+  <circle cx="100" cy="100" r="90" fill="#00704A"/>
+  <!-- Inner White Ring -->
+  <circle cx="100" cy="100" r="76" fill="none" stroke="#FFFFFF" stroke-width="3"/>
+  <!-- Siren Graphic -->
+  <circle cx="100" cy="85" r="22" fill="#FFFFFF"/>
+  <path d="M85 85 C85 68 115 68 115 85 C115 105 85 105 85 85 Z" fill="#00704A"/>
+  <!-- Crown / Star -->
+  <polygon points="100,50 104,60 114,60 106,66 109,76 100,70 91,76 94,66 86,60 96,60" fill="#FFFFFF"/>
+  <!-- Hair waves & Fish tails -->
+  <path d="M56 120 C65 95 85 105 85 130 C75 140 60 135 56 120 Z" fill="#FFFFFF"/>
+  <path d="M144 120 C135 95 115 105 115 130 C125 140 140 135 144 120 Z" fill="#FFFFFF"/>
+  <path d="M85 135 C95 145 105 145 115 135 C110 155 90 155 85 135 Z" fill="#FFFFFF"/>
+</svg>

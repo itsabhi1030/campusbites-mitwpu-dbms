@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="36" fill="#8B0000"/>
+  <!-- Asian Lantern & Golden Chopsticks -->
+  <g transform="translate(65, 25)">
+    <!-- Lantern -->
+    <ellipse cx="35" cy="50" rx="28" ry="32" fill="#D32F2F" stroke="#FFD700" stroke-width="3"/>
+    <line x1="35" y1="18" x2="35" y2="82" stroke="#FFD700" stroke-width="2"/>
+    <rect x="22" y="15" width="26" height="5" rx="2" fill="#FFD700"/>
+    <rect x="22" y="80" width="26" height="5" rx="2" fill="#FFD700"/>
+    <!-- Tassel -->
+    <line x1="35" y1="85" x2="35" y2="100" stroke="#FFD700" stroke-width="3"/>
+  </g>
+  <text x="100" y="152" text-anchor="middle" font-family="'Cinzel', 'Times New Roman', serif" font-weight="bold" font-size="16" fill="#FFD700" letter-spacing="2">MAINLAND CHINA</text>
+  <text x="100" y="170" text-anchor="middle" font-family="'Arial', sans-serif" font-size="8" font-weight="bold" fill="#FFA000" letter-spacing="2">AUTHENTIC CHINESE</text>
+</svg>

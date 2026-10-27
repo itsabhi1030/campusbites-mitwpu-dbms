@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="36" fill="#ED1C24"/>
+  <!-- White Oval -->
+  <ellipse cx="100" cy="85" rx="75" ry="45" fill="#FFFFFF"/>
+  <!-- Cursive Amul Text -->
+  <text x="100" y="98" text-anchor="middle" font-family="'Arial Black', sans-serif" font-weight="900" font-size="38" fill="#ED1C24" letter-spacing="-1">Amul</text>
+  <!-- Blue Banner Tagline -->
+  <rect x="20" y="142" width="160" height="26" rx="6" fill="#005B94"/>
+  <text x="100" y="159" text-anchor="middle" font-family="'Arial', sans-serif" font-size="9" font-weight="bold" fill="#FFFFFF" letter-spacing="1.5">The Taste of India</text>
+</svg>

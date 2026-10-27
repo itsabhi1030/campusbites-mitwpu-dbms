@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="36" fill="#FFFFFF" stroke="#004B93" stroke-width="6"/>
+  <!-- 31 Logo in Blue and Pink -->
+  <g transform="translate(35, 45)">
+    <!-- Blue 'B' stem -->
+    <rect x="20" y="15" width="16" height="75" rx="4" fill="#004B93"/>
+    <!-- Pink '3' forms right part of B -->
+    <path d="M38 15 C58 15 68 25 68 38 C68 48 60 52 52 54 C62 56 70 62 70 74 C70 88 56 90 38 90 Z" fill="#FF5C8D"/>
+    <!-- Blue 'R' stem & pink '1' -->
+    <rect x="76" y="15" width="16" height="75" rx="4" fill="#FF5C8D"/>
+    <!-- Blue 'R' curves -->
+    <path d="M94 15 C110 15 120 25 120 42 C120 54 110 62 94 62 H92 L115 90 H98 L80 62 Z" fill="#004B93"/>
+  </g>
+  <text x="100" y="160" text-anchor="middle" font-family="'Arial Black', sans-serif" font-size="12" font-weight="900" fill="#004B93" letter-spacing="2">baskin</text>
+  <text x="100" y="176" text-anchor="middle" font-family="'Arial Black', sans-serif" font-size="12" font-weight="900" fill="#FF5C8D" letter-spacing="2">robbins</text>
+</svg>
