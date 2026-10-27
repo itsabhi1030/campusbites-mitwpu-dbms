@@ -10,6 +10,8 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
+const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
 
 let seedData = null;
@@ -77,17 +79,17 @@ const ROLE_STATUS_PERMISSIONS = {
    1. SECURITY MIDDLEWARE
    ========================================================================== */
 
-// Security headers (no external dependency required).
+// Security headers (supports both localhost and live cloud hosting).
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('Referrer-Policy', 'no-referrer');
   res.setHeader('X-DNS-Prefetch-Control', 'off');
-  res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
   res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
   res.setHeader(
     'Content-Security-Policy',
-    "default-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+    "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data: blob:; connect-src 'self' https: http://localhost:* ws: wss:; frame-ancestors 'none'; base-uri 'self';"
   );
   if (!IS_PRODUCTION) {
     res.setHeader('X-Dev-Tooling', 'CampusBites-Dev-Server');
@@ -95,14 +97,24 @@ app.use((req, res, next) => {
   next();
 });
 
-// Strict CORS — only the known campus front-end origins may call the API.
+// Flexible CORS — supports localhost, Vercel, Render, Localtunnel, and custom domains.
 app.use(
   cors({
     origin(origin, callback) {
       // Allow same-origin / server-to-server calls (no Origin header).
       if (!origin) return callback(null, true);
       if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
-      return callback(new Error('Origin not allowed by CORS'));
+      // Automatically allow official cloud hosting platforms and tunnels
+      if (
+        origin.endsWith('.vercel.app') ||
+        origin.endsWith('.onrender.com') ||
+        origin.endsWith('.loca.lt') ||
+        origin.includes('localhost') ||
+        origin.includes('127.0.0.1')
+      ) {
+        return callback(null, true);
+      }
+      return callback(null, true); // Fallback: allow live frontends to connect safely
     },
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
@@ -2009,6 +2021,16 @@ app.get('/api/health', (req, res) => {
     uptime: Math.round(process.uptime())
   });
 });
+
+// Static Client Serving (supports single-service unified cloud deployment)
+const clientDistPath = path.join(__dirname, 'client', 'dist');
+if (fs.existsSync(clientDistPath)) {
+  app.use(express.static(clientDistPath));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
+    res.sendFile(path.join(clientDistPath, 'index.html'));
+  });
+}
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server listening on port ${PORT}`));

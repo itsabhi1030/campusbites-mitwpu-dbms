@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: campusbites-mitwpu
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm install && npm run build
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        sync: false
+      - key: SMTP_EMAIL
+        sync: false
+      - key: SMTP_APP_PASSWORD
+        sync: false
+      - key: CLIENT_ORIGINS
+        value: http://localhost:5173,http://localhost:5174

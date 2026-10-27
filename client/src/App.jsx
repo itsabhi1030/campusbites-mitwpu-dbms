@@ -14,7 +14,11 @@ import {
   orderBelongsToOutlet
 } from './menuData.js';
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE)
+  || (typeof window !== 'undefined' && (window.location.port === '5173' || window.location.port === '5174')
+    ? 'http://localhost:5000/api'
+    : '/api');
+
 
 /* ==========================================================================
    1. PURE SVG ICON ENGINE (ZERO EXTERNAL DEPENDENCIES)
