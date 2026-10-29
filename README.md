@@ -174,10 +174,12 @@ g++ -std=c++17 -O2 main.cpp -o campusbites_engine.exe
 
 Engineered at **MIT World Peace University (MIT-WPU), Pune**:
 
-* **Abhishek Sahoo** — [LinkedIn](https://www.linkedin.com/in/abhishek-sahoo-7b7209312) · `abhishek.sahoo@mitwpu.edu.in`
-* **Pratik Kumar Sahu** — [LinkedIn](https://www.linkedin.com/in/pratikkumarsahu0157/) · `pratikkumar.sahu@mitwpu.edu.in`
-* **Shreyas Chakraborty** — [LinkedIn](https://www.linkedin.com/in/shreyas-chakraborty-875a743a5/) · `shreyas.chakraborty@mitwpu.edu.in`
-* **Siddhi Garud** — [LinkedIn](https://www.linkedin.com/in/siddhi-garud-945a31344/) · `siddhi.garud@mitwpu.edu.in`
+| Name | GitHub | LinkedIn | Email |
+| :--- | :--- | :--- | :--- |
+| **Abhishek Sahoo** | [@itsabhi1030](https://github.com/itsabhi1030) | [LinkedIn](https://www.linkedin.com/in/abhishek-sahoo-7b7209312) | `abhishek.sahoo@mitwpu.edu.in` |
+| **Pratik Kumar Sahu** | [@Matrixfender](https://github.com/Matrixfender) | [LinkedIn](https://www.linkedin.com/in/pratikkumarsahu0157/) | `pratikkumar.sahu@mitwpu.edu.in` |
+| **Shreyas Chakraborty** | [@shreyas22-web](https://github.com/shreyas22-web) | [LinkedIn](https://www.linkedin.com/in/shreyas-chakraborty-875a743a5/) | `shreyas.chakraborty@mitwpu.edu.in` |
+| **Siddhi Garud** | [@siddhigarud15-debug](https://github.com/siddhigarud15-debug) | [LinkedIn](https://www.linkedin.com/in/siddhi-garud-945a31344/) | `siddhi.garud@mitwpu.edu.in` |
 
 ---
 

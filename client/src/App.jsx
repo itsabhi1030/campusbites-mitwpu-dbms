@@ -791,24 +791,28 @@ export const CONTRIBUTORS = [
     name: 'Abhishek Sahoo',
     email: 'abhishek.sahoo@mitwpu.edu.in',
     linkedin: 'https://www.linkedin.com/in/abhishek-sahoo-7b7209312',
+    github: 'https://github.com/itsabhi1030',
     initials: 'AS'
   },
   {
     name: 'Pratik Kumar Sahu',
     email: 'pratikkumar.sahu@mitwpu.edu.in',
     linkedin: 'https://www.linkedin.com/in/pratikkumarsahu0157/',
+    github: 'https://github.com/Matrixfender',
     initials: 'PS'
   },
   {
     name: 'Shreyas Chakraborty',
     email: 'shreyas.chakraborty@mitwpu.edu.in',
     linkedin: 'https://www.linkedin.com/in/shreyas-chakraborty-875a743a5/',
+    github: 'https://github.com/shreyas22-web',
     initials: 'SC'
   },
   {
     name: 'Siddhi Garud',
     email: 'siddhi.garud@mitwpu.edu.in',
     linkedin: 'https://www.linkedin.com/in/siddhi-garud-945a31344/',
+    github: 'https://github.com/siddhigarud15-debug',
     initials: 'SG'
   }
 ];
@@ -924,7 +928,14 @@ export default function App() {
   const [appliedPromo, setAppliedPromo] = useState('CAMPUS50');
   const [promoInput, setPromoInput] = useState('CAMPUS50');
   const [orders, setOrders] = useState([]);
-  const [activeOrder, setActiveOrder] = useState(null);
+  const [activeOrder, setActiveOrder] = useState(() => {
+    try {
+      const saved = localStorage.getItem('foodhub_active_order');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
   const [selectedBsonOrder, setSelectedBsonOrder] = useState(null);
   const [dbConnected, setDbConnected] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
@@ -1093,6 +1104,16 @@ export default function App() {
     else localStorage.removeItem('foodhub_user');
   }, [user]);
 
+  useEffect(() => {
+    try {
+      if (activeOrder) {
+        localStorage.setItem('foodhub_active_order', JSON.stringify(activeOrder));
+      } else {
+        localStorage.removeItem('foodhub_active_order');
+      }
+    } catch { }
+  }, [activeOrder]);
+
   // Carousel Auto-Play
   useEffect(() => {
     const timer = setInterval(() => setActiveSlide((s) => (s + 1) % 3), 5500);
@@ -1123,12 +1144,81 @@ export default function App() {
               localStorage.setItem('cb_delivered_deliveries', JSON.stringify(delivered));
             } catch { }
           }
+
+          // SYNCHRONIZE ACTIVE ORDER FOR CUSTOMER STOREFRONT
+          setActiveOrder((prevActive) => {
+            if (!prevActive) {
+              // If customer is signed in, check if they have a non-cancelled recent order in data
+              if (user?.email) {
+                const uEmail = String(user.email).toLowerCase();
+                let dismissedId = null;
+                try { dismissedId = localStorage.getItem('foodhub_dismissed_order'); } catch { }
+                const userLatest = data.find((o) => {
+                  const cEmail = String(o.customer?.email || o.customer_email || '').toLowerCase();
+                  if (cEmail !== uEmail) return false;
+                  const ordId = String(o._id || o.orderId || o.order_number || '');
+                  if (dismissedId && ordId === dismissedId) return false;
+                  const s = (o.status || '').toLowerCase();
+                  return s !== 'cancelled';
+                });
+                if (userLatest) {
+                  return userLatest;
+                }
+              }
+              return null;
+            }
+
+            // Verify ownership before syncing: active order must belong to current user
+            if (user?.email) {
+              const uEmail = String(user.email).toLowerCase();
+              const prevEmail = String(prevActive.customer?.email || prevActive.customer_email || prevActive.customer_id || '').toLowerCase();
+              if (prevEmail && prevEmail !== uEmail) {
+                // This active order belongs to a different user - clear it
+                return null;
+              }
+            }
+
+            const activeTargetId = String(prevActive._id || prevActive.orderId || prevActive.order_number || '').trim();
+            const match = data.find((o) => {
+              if (!o) return false;
+              const oId = String(o._id || '').trim();
+              const oNum = String(o.order_number || '').trim();
+              const oOrderId = String(o.orderId || '').trim();
+              return (
+                (oId && (oId === activeTargetId || oId === String(prevActive._id || '') || oId === String(prevActive.orderId || ''))) ||
+                (oNum && (oNum === activeTargetId || oNum === String(prevActive.order_number || '') || oNum === String(prevActive.orderId || ''))) ||
+                (oOrderId && (oOrderId === activeTargetId || oOrderId === String(prevActive.orderId || '') || oOrderId === String(prevActive.order_number || '')))
+              );
+            });
+
+            if (match) {
+              // Double-check that matched order belongs to current user
+              if (user?.email) {
+                const uEmail = String(user.email).toLowerCase();
+                const matchEmail = String(match.customer?.email || match.customer_email || match.customer_id || '').toLowerCase();
+                if (matchEmail && matchEmail !== uEmail) return null;
+              }
+
+              const prevStatus = (prevActive.status || '').toLowerCase();
+              const newStatus = (match.status || '').toLowerCase();
+              const isNowDelivered = newStatus === 'delivered' || newStatus === 'completed';
+              const wasDelivered = prevStatus === 'delivered' || prevStatus === 'completed';
+
+              if (isNowDelivered && !wasDelivered) {
+                showToast(t?.orderDeliveredToast || `🎉 Order #${match.order_number || match.orderId || ''} has been delivered safely!`);
+              }
+
+              return { ...prevActive, ...match, status: match.status };
+            }
+
+            return prevActive;
+          });
         }
       }
     } catch {
       setDbConnected(false);
     }
-  }, [selectedBsonOrder]);
+  }, [selectedBsonOrder, user, showToast, t]);
 
   // Live auto-polling: refresh orders every 4 seconds so Kitchen KDS and Rider Dispatch stay in sync
   useEffect(() => {
@@ -1479,16 +1569,17 @@ export default function App() {
 
   // Builds the RBAC identity headers sent with every privileged mutation so the
   // API can enforce role + tenant scope server-side (never trust the client).
-  const buildStaffAuthHeaders = useCallback(() => {
+  const buildStaffAuthHeaders = useCallback((targetRole) => {
     const headers = { 'Content-Type': 'application/json' };
-    if (role === 'RESTAURANT' && kdsSession?.email) {
+    const effectiveRole = targetRole || role;
+    if (effectiveRole === 'RESTAURANT' || (role === 'RESTAURANT' && kdsSession?.email)) {
       headers['x-campus-role'] = 'RESTAURANT';
-      headers['x-campus-email'] = String(kdsSession.email).toLowerCase();
-      headers['x-campus-outlet'] = resolveOutletId(kdsSession.outletId) || kdsSession.outletId || '';
-    } else if (role === 'DRIVER' && riderSession?.email) {
+      headers['x-campus-email'] = String(kdsSession?.email || 'swad@mitwpu.edu.in').toLowerCase();
+      headers['x-campus-outlet'] = resolveOutletId(kdsSession?.outletId) || kdsSession?.outletId || 'all';
+    } else if (effectiveRole === 'DELIVERY_PARTNER' || effectiveRole === 'DRIVER' || (role === 'DRIVER' && riderSession?.email)) {
       headers['x-campus-role'] = 'DELIVERY_PARTNER';
-      headers['x-campus-email'] = String(riderSession.email).toLowerCase();
-    } else if (role === 'ADMIN' && unlockedRoles?.ADMIN) {
+      headers['x-campus-email'] = String(riderSession?.email || 'rider1@mitwpu.edu.in').toLowerCase();
+    } else if (effectiveRole === 'ADMIN' || (role === 'ADMIN' && unlockedRoles?.ADMIN)) {
       headers['x-campus-role'] = 'ADMIN';
       headers['x-campus-email'] = 'admin@mitwpu.edu.in';
     } else if (user?.email) {
@@ -1498,6 +1589,15 @@ export default function App() {
     return headers;
   }, [role, kdsSession, riderSession, unlockedRoles, user]);
 
+  const isMatchingOrder = (ord, targetId) => {
+    if (!ord || !targetId) return false;
+    const tid = String(targetId).trim();
+    return (
+      String(ord._id || '').trim() === tid ||
+      String(ord.orderId || '').trim() === tid ||
+      String(ord.order_number || '').trim() === tid
+    );
+  };
 
   const handleUpdateOrderStatus = async (orderId, newStatus, note, roleLabel) => {
     let riderAssignment = null;
@@ -1524,7 +1624,7 @@ export default function App() {
     try {
       const res = await fetch(`${API_BASE}/orders/${orderId}/status`, {
         method: 'PATCH',
-        headers: buildStaffAuthHeaders(),
+        headers: buildStaffAuthHeaders(roleLabel),
         body: JSON.stringify({
           status: newStatus,
           note,
@@ -1540,10 +1640,12 @@ export default function App() {
     } catch {
       // Fallback
     }
+
+    let updatedMatchingItem = null;
     setOrders((prev) =>
-      prev.map((ord) =>
-        ord._id === orderId || ord.orderId === orderId
-          ? {
+      prev.map((ord) => {
+        if (isMatchingOrder(ord, orderId)) {
+          updatedMatchingItem = {
             ...ord,
             status: newStatus,
             ...(riderAssignment || {}),
@@ -1556,12 +1658,29 @@ export default function App() {
                 role: roleLabel
               }
             ]
-          }
-          : ord
-      )
+          };
+          return updatedMatchingItem;
+        }
+        return ord;
+      })
     );
-    if (activeOrder && (activeOrder.orderId === orderId || activeOrder._id === orderId)) {
+
+    if (activeOrder && isMatchingOrder(activeOrder, orderId)) {
       setActiveOrder((prev) => (prev ? { ...prev, status: newStatus, ...(riderAssignment || {}) } : null));
+    }
+
+    if (newStatus === 'delivered' || newStatus === 'completed') {
+      const completionTimestamp = new Date().toISOString();
+      setDeliveredFoodDeliveries((prev) => {
+        const filtered = prev.filter((d) => !isMatchingOrder(d, orderId));
+        const target = updatedMatchingItem || { _id: orderId, orderId, status: newStatus, completed_at: completionTimestamp };
+        const updated = [target, ...filtered];
+        try {
+          localStorage.setItem('cb_delivered_deliveries', JSON.stringify(updated));
+        } catch { }
+        return updated;
+      });
+      showToast(t.orderDeliveredToast || `🎉 Order delivered safely!`);
     }
   };
 
@@ -1574,7 +1693,7 @@ export default function App() {
     // and appended to dedicated deliveredFoodDeliveries state without requiring a manual page refresh
     setOrders((prev) =>
       prev.map((ord) => {
-        if (ord._id === orderId || ord.orderId === orderId) {
+        if (isMatchingOrder(ord, orderId)) {
           completedItem = {
             ...ord,
             status: 'completed',
@@ -1597,7 +1716,7 @@ export default function App() {
 
     // Immediately isolate & append to dedicated Delivered Food Deliveries collection/state
     setDeliveredFoodDeliveries((prev) => {
-      const filtered = prev.filter((d) => (d._id || d.orderId) !== orderId);
+      const filtered = prev.filter((d) => !isMatchingOrder(d, orderId));
       const target = completedItem || { _id: orderId, orderId, status: 'completed', completed_at: completionTimestamp };
       const updated = [target, ...filtered];
       try {
@@ -1606,7 +1725,7 @@ export default function App() {
       return updated;
     });
 
-    if (activeOrder && (activeOrder.orderId === orderId || activeOrder._id === orderId)) {
+    if (activeOrder && isMatchingOrder(activeOrder, orderId)) {
       setActiveOrder((prev) => (prev ? { ...prev, status: 'completed', completed_at: completionTimestamp } : null));
     }
 
@@ -1617,9 +1736,8 @@ export default function App() {
     try {
       const res = await fetch(`${API_BASE}/orders/${orderId}/status`, {
         method: 'PATCH',
-        headers: buildStaffAuthHeaders(),
+        headers: buildStaffAuthHeaders('DELIVERY_PARTNER'),
         body: JSON.stringify({
-
           status: 'completed',
           note: 'Delivery marked as completed by rider',
           role: 'DELIVERY_PARTNER',
@@ -1907,9 +2025,28 @@ export default function App() {
                     <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                       <button
                         onClick={() => {
+                          // Clear all user-tied state
                           setUser(null);
+                          setCart([]);
+                          setActiveOrder(null);
+                          setAppliedPromo('');
+                          setPromoInput('');
                           setUserMenuOpen(false);
-                          showToast('Logged out of CampusBites');
+                          setIsCartOpen(false);
+                          setIsCheckoutOpen(false);
+                          setIsSuccessOpen(false);
+                          setIsTrackerOpen(false);
+                          setIsPastOrdersOpen(false);
+                          setIsMostOrderedOpen(false);
+                          setIsEditProfileOpen(false);
+                          // Clear all user-tied localStorage keys
+                          try {
+                            localStorage.removeItem('foodhub_user');
+                            localStorage.removeItem('foodhub_cart');
+                            localStorage.removeItem('foodhub_active_order');
+                            localStorage.removeItem('foodhub_dismissed_order');
+                          } catch {}
+                          showToast('Signed out of CampusBites successfully');
                         }}
                         className="flex w-full items-center justify-center gap-2 rounded-xl py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition"
                       >
@@ -2087,36 +2224,98 @@ export default function App() {
               </div>
             </section>
 
-            {/* Live Active Order Banner */}
-            {activeOrder && (
-              <div className="mb-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-orange-200 bg-orange-50/90 p-4 text-left dark:border-orange-950/60 dark:bg-orange-950/30">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-600 text-white font-bold animate-pulse">
-                    🔥
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-extrabold text-slate-900 dark:text-white">
-                        #{activeOrder.order_number || activeOrder.orderId} ({activeOrder.status?.toUpperCase()})
-                      </span>
-                      <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-                        OTP: {activeOrder.pickupOtp || activeOrder.pickup_otp}
-                      </span>
+            {/* Live Active / Delivered Order Banner — only shown when user is signed in */}
+            {user && activeOrder && (() => {
+              const orderStatus = (activeOrder.status || 'placed').toLowerCase();
+              const isDelivered = orderStatus === 'delivered' || orderStatus === 'completed';
+              const orderNum = activeOrder.order_number || activeOrder.orderId || 'Recent';
+              const dropOff = activeOrder.delivery_address?.street || activeOrder.locationDetail || 'MIT-WPU Campus';
+              const riderName = activeOrder.assignedRiderName || activeOrder.assigned_rider_name || activeOrder.delivery_partner?.name;
+
+              if (isDelivered) {
+                return (
+                  <div className="mb-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-300 bg-emerald-50/95 p-4 text-left shadow-sm dark:border-emerald-800/80 dark:bg-emerald-950/40 transition-all animate-fadeIn">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white font-bold shadow-md ring-4 ring-emerald-500/20">
+                        <PackageCheck className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-black text-slate-900 dark:text-white">
+                            #{orderNum}
+                          </span>
+                          <span className="rounded-full bg-emerald-200 px-2.5 py-0.5 text-[10px] font-black uppercase text-emerald-900 dark:bg-emerald-900/80 dark:text-emerald-200">
+                            DELIVERED ✓
+                          </span>
+                          {activeOrder.completed_at && (
+                            <span className="hidden sm:inline font-mono text-[10px] text-emerald-700 dark:text-emerald-300 font-bold">
+                              {new Date(activeOrder.completed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] font-medium text-emerald-800 dark:text-emerald-300 mt-0.5">
+                          Order delivered safely to <strong>{dropOff}</strong>{riderName ? ` · Delivered by ${riderName}` : ''} · Handed over
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                      {activeOrder.items?.length || 0} items · {activeOrder.locationDetail || 'MIT-WPU Campus'}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setIsTrackerOpen(true)}
+                        className="flex items-center gap-1.5 rounded-xl bg-emerald-700 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-600 shadow transition"
+                      >
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        <span>View Delivery Proof</span>
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          const id = String(activeOrder._id || activeOrder.orderId || activeOrder.order_number || '');
+                          if (id) {
+                            try { localStorage.setItem('foodhub_dismissed_order', id); } catch {}
+                          }
+                          setActiveOrder(null);
+                          try { localStorage.removeItem('foodhub_active_order'); } catch {}
+                        }}
+                        title="Dismiss banner"
+                        className="rounded-xl border border-emerald-200 bg-white/80 p-2 text-slate-400 hover:text-slate-700 hover:bg-white dark:border-emerald-800 dark:bg-slate-900 dark:hover:bg-slate-800 transition"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
+                );
+              }
+
+              return (
+                <div className="mb-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-orange-200 bg-orange-50/90 p-4 text-left dark:border-orange-950/60 dark:bg-orange-950/30">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-600 text-white font-bold animate-pulse">
+                      🔥
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-extrabold text-slate-900 dark:text-white">
+                          #{orderNum} ({activeOrder.status?.toUpperCase()})
+                        </span>
+                        <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                          OTP: {activeOrder.pickupOtp || activeOrder.pickup_otp}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                        {activeOrder.items?.length || 0} items · {dropOff}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setIsTrackerOpen(true)}
+                    className="flex items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white hover:bg-slate-800 dark:bg-orange-600"
+                  >
+                    <span>{t.trackLiveStatus}</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </button>
                 </div>
-                <button
-                  onClick={() => setIsTrackerOpen(true)}
-                  className="flex items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white hover:bg-slate-800 dark:bg-orange-600"
-                >
-                  <span>{t.trackLiveStatus}</span>
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            )}
+              );
+            })()}
 
             {/* VISUAL BRAND OUTLETS SHOWCASE GRID */}
             {!isSearching && (
@@ -3533,15 +3732,30 @@ export default function App() {
                         </a>
                       </div>
                     </div>
-                    <a
-                      href={member.linkedin}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title={`Connect with ${member.name} on LinkedIn`}
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#0077b5] text-white shadow-sm transition hover:bg-[#005f93] hover:scale-105 active:scale-95"
-                    >
-                      <Linkedin className="h-4 w-4" />
-                    </a>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {member.github && (
+                        <a
+                          href={member.github}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={`${member.name} on GitHub`}
+                          className="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-800 text-white shadow-sm transition hover:bg-slate-700 hover:scale-105 active:scale-95 dark:bg-slate-700 dark:hover:bg-slate-600"
+                        >
+                          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2z" />
+                          </svg>
+                        </a>
+                      )}
+                      <a
+                        href={member.linkedin}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={`Connect with ${member.name} on LinkedIn`}
+                        className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#0077b5] text-white shadow-sm transition hover:bg-[#005f93] hover:scale-105 active:scale-95"
+                      >
+                        <Linkedin className="h-4 w-4" />
+                      </a>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -3711,6 +3925,9 @@ export default function App() {
           onClose={() => setIsAuthOpen(false)}
           onSuccess={(session) => {
             setUser(session);
+            // Restore default promo on login
+            setAppliedPromo('CAMPUS50');
+            setPromoInput('CAMPUS50');
             showToast(`Welcome to CampusBites, ${session.fullName}!`);
           }}
           showToast={showToast}
@@ -3735,22 +3952,28 @@ export default function App() {
       )}
 
       {/* 4c. PAST ORDERS & REORDER MODAL (Zomato/Swiggy Style) */}
-      {isPastOrdersOpen && (
+      {isPastOrdersOpen && user && (
         <PastOrdersModal
           isOpen={isPastOrdersOpen}
           onClose={() => setIsPastOrdersOpen(false)}
           orders={orders}
           user={user}
           onReorder={handleReorder}
+          onTrackOrder={(ord) => {
+            setActiveOrder(ord);
+            setIsPastOrdersOpen(false);
+            setIsTrackerOpen(true);
+          }}
         />
       )}
 
       {/* 4d. MOST ORDERED RESTAURANTS MODAL (Zomato/Swiggy Style) */}
-      {isMostOrderedOpen && (
+      {isMostOrderedOpen && user && (
         <MostOrderedRestaurantsModal
           isOpen={isMostOrderedOpen}
           onClose={() => setIsMostOrderedOpen(false)}
           orders={orders}
+          user={user}
           outlets={OUTLETS}
           onSelectOutlet={handleSelectOutletFromProfile}
         />
@@ -3808,6 +4031,7 @@ export default function App() {
           order={activeOrder}
           onClose={() => setIsTrackerOpen(false)}
           onUpdateStatus={handleUpdateOrderStatus}
+          onOrderUpdated={(fresh) => setActiveOrder((prev) => (prev ? { ...prev, ...fresh } : fresh))}
           showToast={showToast}
           fetchOrders={fetchOrders}
           t={t}
@@ -4514,15 +4738,17 @@ function EditProfileModal({ isOpen, onClose, user, onUpdate, showToast }) {
 /* ==========================================================================
    PAST ORDERS & REORDER MODAL (Zomato/Swiggy Style)
    ========================================================================== */
-function PastOrdersModal({ isOpen, onClose, orders, user, onReorder }) {
+function PastOrdersModal({ isOpen, onClose, orders, user, onReorder, onTrackOrder }) {
   if (!isOpen) return null;
 
-  // Filter orders for the current user
+  // Filter orders strictly to the current user's email only
   const userOrders = (orders || []).filter((o) => {
-    if (!user) return true;
-    const cEmail = (o.customer?.email || o.customer_email || '').toLowerCase();
-    const uEmail = (user.email || '').toLowerCase();
-    return !cEmail || cEmail === uEmail || (orders.length <= 10);
+    if (!user?.email) return false; // Never show orders if user is not logged in
+    const cEmail = (o.customer?.email || o.customer_email || o.customer_id || '').toLowerCase().trim();
+    const uEmail = (user.email || '').toLowerCase().trim();
+    // Only show order if email matches, or order has no email (e.g. guest/local-only orders)
+    // Do NOT use orders.length as a fallback — that leaks cross-user data
+    return !cEmail || cEmail === uEmail;
   });
 
   return (
@@ -4615,14 +4841,24 @@ function PastOrdersModal({ isOpen, onClose, orders, user, onReorder }) {
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => onReorder(ord)}
-                      className="flex items-center gap-1.5 rounded-xl bg-orange-600 px-3.5 py-1.5 text-xs font-bold text-white shadow hover:bg-orange-500 active:scale-95 transition"
-                    >
-                      <RefreshCw className="h-3.5 w-3.5" />
-                      <span>Reorder</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => onTrackOrder?.(ord)}
+                        className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 transition"
+                      >
+                        <Bike className="h-3.5 w-3.5 text-orange-600" />
+                        <span>{isDelivered ? 'View Receipt' : 'Track Live'}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onReorder(ord)}
+                        className="flex items-center gap-1.5 rounded-xl bg-orange-600 px-3.5 py-1.5 text-xs font-bold text-white shadow hover:bg-orange-500 active:scale-95 transition"
+                      >
+                        <RefreshCw className="h-3.5 w-3.5" />
+                        <span>Reorder</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
@@ -4637,19 +4873,23 @@ function PastOrdersModal({ isOpen, onClose, orders, user, onReorder }) {
 /* ==========================================================================
    MOST ORDERED RESTAURANTS MODAL (Zomato/Swiggy Style)
    ========================================================================== */
-function MostOrderedRestaurantsModal({ isOpen, onClose, orders, outlets, onSelectOutlet }) {
+function MostOrderedRestaurantsModal({ isOpen, onClose, orders, user, outlets, onSelectOutlet }) {
   if (!isOpen) return null;
 
-  // Calculate order counts per outlet
+  // Calculate order counts per outlet — scoped strictly to current user's orders
   const outletCounts = {};
+  const uEmail = (user?.email || '').toLowerCase().trim();
   (orders || []).forEach((o) => {
+    // Only count orders that belong to the current user
+    const cEmail = (o.customer?.email || o.customer_email || o.customer_id || '').toLowerCase().trim();
+    if (uEmail && cEmail && cEmail !== uEmail) return;
     const key = o.restaurant_id || o.outlet_id || o.restaurant_name || o.outletName;
     if (key) {
       outletCounts[key] = (outletCounts[key] || 0) + 1;
     }
   });
 
-  // Sort outlets by frequency
+  // Sort outlets by frequency (user-scoped)
   const rankedOutlets = (outlets || [])
     .filter((o) => o.id !== 'all')
     .map((o) => ({
@@ -5717,7 +5957,7 @@ function RiderDeliveryOtpVerificationModal({ isOpen, onClose, order, onConfirmDe
   );
 }
 
-function LiveOrderTrackerComponent({ order, onClose, onUpdateStatus, showToast, fetchOrders, t = {} }) {
+function LiveOrderTrackerComponent({ order, onClose, onUpdateStatus, onOrderUpdated, showToast, fetchOrders, t = {} }) {
   const [currentOrder, setCurrentOrder] = useState(order);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
@@ -5738,6 +5978,7 @@ function LiveOrderTrackerComponent({ order, onClose, onUpdateStatus, showToast, 
       if (res.ok) {
         const fresh = await res.json();
         setCurrentOrder((prev) => ({ ...prev, ...fresh }));
+        onOrderUpdated?.(fresh);
         if (fresh.status !== currentOrder?.status) {
           fetchOrders?.();
         }
@@ -5745,7 +5986,7 @@ function LiveOrderTrackerComponent({ order, onClose, onUpdateStatus, showToast, 
     } catch {
       // offline/silent fallback
     }
-  }, [orderId, currentOrder?.status, fetchOrders]);
+  }, [orderId, currentOrder?.status, fetchOrders, onOrderUpdated]);
 
   useEffect(() => {
     pollOrder();
@@ -5914,8 +6155,13 @@ function LiveOrderTrackerComponent({ order, onClose, onUpdateStatus, showToast, 
 
                 {/* Active Gradient Line Fill */}
                 <div
-                  className={`absolute left-4 top-4 h-1 -translate-y-1/2 transition-all duration-500 ${isCancelled ? 'bg-rose-500' : 'bg-gradient-to-r from-orange-500 to-amber-500'
-                    }`}
+                  className={`absolute left-4 top-4 h-1 -translate-y-1/2 transition-all duration-500 ${
+                    isCancelled
+                      ? 'bg-rose-500'
+                      : (rawStatus === 'delivered' || rawStatus === 'completed')
+                        ? 'bg-emerald-500'
+                        : 'bg-gradient-to-r from-orange-500 to-amber-500'
+                  }`}
                   style={{ width: `calc(${progressPercent}% * 0.88)` }}
                 />
 
@@ -5923,10 +6169,11 @@ function LiveOrderTrackerComponent({ order, onClose, onUpdateStatus, showToast, 
                   const StepIcon = step.icon;
                   const isDone = !isCancelled && idx < currentStepIdx;
                   const isCurrent = !isCancelled && idx === currentStepIdx;
+                  const isTerminalDelivered = (rawStatus === 'delivered' || rawStatus === 'completed') && idx === 3;
 
                   let circleStyle = 'border-slate-300 bg-white text-slate-400 dark:border-slate-700 dark:bg-slate-900';
-                  if (isDone) {
-                    circleStyle = 'border-emerald-600 bg-emerald-600 text-white shadow-sm';
+                  if (isDone || isTerminalDelivered) {
+                    circleStyle = 'border-emerald-600 bg-emerald-600 text-white shadow-sm ring-4 ring-emerald-500/20';
                   } else if (isCurrent) {
                     circleStyle = 'border-orange-500 bg-orange-600 text-white ring-4 ring-orange-500/20 shadow-md animate-pulse';
                   } else if (isCancelled) {
@@ -5936,17 +6183,20 @@ function LiveOrderTrackerComponent({ order, onClose, onUpdateStatus, showToast, 
                   return (
                     <div key={step.key} className="relative z-10 flex flex-col items-center">
                       <div className={`flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all ${circleStyle}`}>
-                        {isDone ? (
+                        {isDone || isTerminalDelivered ? (
                           <CheckCircle2 className="h-4 w-4" />
                         ) : (
                           <StepIcon className="h-4 w-4" />
                         )}
                       </div>
-                      <span className={`mt-2 text-[11px] font-bold tracking-tight text-center ${isCurrent
-                        ? 'text-orange-600 dark:text-orange-400 font-extrabold'
-                        : isDone
-                          ? 'text-slate-800 dark:text-slate-200'
-                          : 'text-slate-400'
+                      <span className={`mt-2 text-[11px] font-bold tracking-tight text-center ${
+                        isTerminalDelivered
+                          ? 'text-emerald-600 dark:text-emerald-400 font-extrabold'
+                          : isCurrent
+                            ? 'text-orange-600 dark:text-orange-400 font-extrabold'
+                            : isDone
+                              ? 'text-slate-800 dark:text-slate-200'
+                              : 'text-slate-400'
                         }`}>
                         {step.label}
                       </span>
@@ -6245,27 +6495,42 @@ function LiveOrderTrackerComponent({ order, onClose, onUpdateStatus, showToast, 
             )}
 
             {/* C. PICKUP VERIFICATION OTP CARD */}
-            <div className="rounded-2xl border-2 border-dashed border-orange-300 bg-orange-50/70 p-4 text-center dark:border-orange-800 dark:bg-orange-950/30 space-y-1">
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-500 dark:text-slate-400">
-                {t.pickupOtpLabel || 'Pickup Verification OTP'}
-              </span>
-              <div className="flex items-center justify-center gap-2">
-                <span className="font-mono text-3xl font-black text-orange-600 dark:text-orange-400 tracking-widest">
-                  {currentOrder?.pickupOtp || '----'}
-                </span>
-                <button
-                  type="button"
-                  onClick={handleCopyOtp}
-                  className="rounded-lg border border-orange-200 bg-white p-1.5 text-xs text-orange-600 hover:bg-orange-50 dark:border-orange-800 dark:bg-slate-900 transition"
-                  title="Copy OTP"
-                >
-                  {copiedOtp ? <CheckCircle2 className="h-4 w-4 text-emerald-600" /> : <Tag className="h-4 w-4" />}
-                </button>
+            {rawStatus === 'delivered' || rawStatus === 'completed' ? (
+              <div className="rounded-2xl border-2 border-emerald-300 bg-emerald-50/80 p-4 text-center dark:border-emerald-800 dark:bg-emerald-950/30 space-y-1.5 animate-fadeIn">
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-extrabold text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                  <span>Handover Verified ✓</span>
+                </div>
+                <div className="font-mono text-xs font-bold text-slate-700 dark:text-slate-200">
+                  Delivery OTP: <span className="tracking-widest font-extrabold text-emerald-700 dark:text-emerald-400">{currentOrder?.pickupOtp || currentOrder?.pickup_otp || '----'}</span> (Verified)
+                </div>
+                <p className="text-[11px] text-emerald-800 dark:text-emerald-300">
+                  Package successfully handed over at {dropOffLocation}.
+                </p>
               </div>
-              <p className="text-[10px] text-slate-500">
-                Show this 4-digit OTP to your campus runner or stall counter.
-              </p>
-            </div>
+            ) : (
+              <div className="rounded-2xl border-2 border-dashed border-orange-300 bg-orange-50/70 p-4 text-center dark:border-orange-800 dark:bg-orange-950/30 space-y-1">
+                <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                  {t.pickupOtpLabel || 'Pickup Verification OTP'}
+                </span>
+                <div className="flex items-center justify-center gap-2">
+                  <span className="font-mono text-3xl font-black text-orange-600 dark:text-orange-400 tracking-widest">
+                    {currentOrder?.pickupOtp || currentOrder?.pickup_otp || '----'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleCopyOtp}
+                    className="rounded-lg border border-orange-200 bg-white p-1.5 text-xs text-orange-600 hover:bg-orange-50 dark:border-orange-800 dark:bg-slate-900 transition"
+                    title="Copy OTP"
+                  >
+                    {copiedOtp ? <CheckCircle2 className="h-4 w-4 text-emerald-600" /> : <Tag className="h-4 w-4" />}
+                  </button>
+                </div>
+                <p className="text-[10px] text-slate-500">
+                  Show this 4-digit OTP to your campus runner or stall counter.
+                </p>
+              </div>
+            )}
 
             {/* D. ORDER DETAILS RECAP */}
             {items.length > 0 && (
