@@ -184,4 +184,4 @@ Engineered at **MIT World Peace University (MIT-WPU), Pune**:
 ---
 
 ## 📄 License
-This project is developed for academic evaluation for DBMS CCA 2.
+This project is developed for academic evaluation for DBMS CCA 2 at MIT WPU
