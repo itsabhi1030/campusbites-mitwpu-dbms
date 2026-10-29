@@ -1,4 +1,4 @@
-# 🎓 MIT-WPU CampusBites — Smart Campus Dining & Logistics Platform
+# 🎓 MIT-WPU CampusBites: Smart Campus Dining & Logistics Platform
 
 [![Node.js](https://img.shields.io/badge/Node.js-v20+-green.svg)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-19.2-blue.svg)](https://react.dev/)
