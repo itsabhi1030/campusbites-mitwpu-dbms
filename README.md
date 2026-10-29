@@ -184,4 +184,4 @@ Engineered at **MIT World Peace University (MIT-WPU), Pune**:
 ---
 
 ## 📄 License
-This project is developed for academic evaluation and smart campus dining research at MIT World Peace University. Distributed under the MIT License.
+This project is developed for academic evaluation for DBMS CCA 2.
