@@ -5,7 +5,6 @@
 [![Express](https://img.shields.io/badge/Express-5.3-lightgrey.svg)](https://expressjs.com/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas_Cloud-emerald.svg)](https://www.mongodb.com/atlas)
 [![C++](https://img.shields.io/badge/C++-17_DSA_Engine-purple.svg)](https://isocpp.org/)
-[![License](https://img.shields.io/badge/License-MIT-orange.svg)](LICENSE)
 
 > **Autonomous multi-tenant food court ordering, kitchen priority scheduling, and campus EV courier dispatch platform engineered for MIT World Peace University (MIT-WPU), Pune.**
 
